@@ -60,4 +60,12 @@ def get_unique_names():
     return result
 
 
+@app.route('/tracks_count')
+def get_tracks_count():
+    query = 'SELECT TrackId FROM tracks ORDER BY TrackId DESC'
+    records = db.execute_query(query)
+    result = str(records[0])
+    return result
+
+
 app.run(debug=True)
