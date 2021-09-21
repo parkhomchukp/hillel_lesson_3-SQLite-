@@ -1,4 +1,10 @@
 from flask import Flask
+from webargs import fields
+from marshmallow import validate
+from webargs.flaskparser import use_kwargs
+
+import db
+import utils
 
 app = Flask(__name__)
 
@@ -39,6 +45,18 @@ def get_customers(first_name, last_name):
 
     records = execute_query(query)
     result = format_records(records)
+    return result
+
+
+@app.route('/unique_names')
+def get_unique_names():
+    query = 'SELECT FirstName FROM customers'
+    records = db.execute_query(query)
+    unique_names = list()
+    for name in records:
+        if name not in unique_names:
+            unique_names.append(name)
+    result = str(len(unique_names))
     return result
 
 
