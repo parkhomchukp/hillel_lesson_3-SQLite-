@@ -14,38 +14,38 @@ def home():
     return 'SUCCESS'
 
 
-@app.route('/customers')
-@use_kwargs(
-    {
-        "first_name": fields.Str(
-            required=False,
-            missing=None,
-            validate=[validate.Regexp('^[0-9]*')]
-        ),
-        "last_name": fields.Str(
-            required=False,
-            missing=None,
-            validate=[validate.Regexp('^[0-9]*')]
-        ),
-    },
-    location="query",
-)
-def get_customers(first_name, last_name):
-    query = 'select * from customers'
-
-    fields = {}
-    if first_name:
-        fields["FirstName"] = first_name
-
-    if last_name:
-        fields["LastName"] = last_name
-
-    if fields:
-        query += ' WHERE ' + ' AND '.join(f'{k}="{v}"' for k, v in fields.items())
-
-    records = execute_query(query)
-    result = format_records(records)
-    return result
+# @app.route('/customers')
+# @use_kwargs(
+#     {
+#         "first_name": fields.Str(
+#             required=False,
+#             missing=None,
+#             validate=[validate.Regexp('^[0-9]*')]
+#         ),
+#         "last_name": fields.Str(
+#             required=False,
+#             missing=None,
+#             validate=[validate.Regexp('^[0-9]*')]
+#         ),
+#     },
+#     location="query",
+# )
+# def get_customers(first_name, last_name):
+#     query = 'select * from customers'
+#
+#     fields = {}
+#     if first_name:
+#         fields["FirstName"] = first_name
+#
+#     if last_name:
+#         fields["LastName"] = last_name
+#
+#     if fields:
+#         query += ' WHERE ' + ' AND '.join(f'{k}="{v}"' for k, v in fields.items())
+#
+#     records = execute_query(query)
+#     result = format_records(records)
+#     return result
 
 
 @app.route('/unique_names')
@@ -65,6 +65,29 @@ def get_tracks_count():
     query = 'SELECT TrackId FROM tracks ORDER BY TrackId DESC'
     records = db.execute_query(query)
     result = str(records[0])
+    return result
+
+
+@app.route('/customers')
+@use_kwargs(
+    {
+        'text': fields.Str(
+            required=False,
+            missing=None,
+            validate=validate.Regexp('^[a-zA-Z]+$')
+        )
+    },
+    location='query',
+)
+def get_customers(text):
+    if text:
+        query = db.execute_query(f"SELECT * FROM customers WHERE  FirstName LIKE '%{text}%' "
+                                 f"OR LastName LIKE '%{text}%' OR Company LIKE '%{text}%' OR Address LIKE '%{text}%'"
+                                 f"OR City LIKE '%{text}%' OR State LIKE '%{text}%' OR  Country LIKE '%{text}%'"
+                                 f"OR Email LIKE '%{text}%'")
+    else:
+        query = db.execute_query("SELECT * FROM customers")
+    result = utils.format_records(query)
     return result
 
 
