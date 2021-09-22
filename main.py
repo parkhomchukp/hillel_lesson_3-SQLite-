@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from webargs import fields
 from marshmallow import validate
 from webargs.flaskparser import use_kwargs
@@ -7,6 +7,17 @@ import db
 import utils
 
 app = Flask(__name__)
+
+
+@app.errorhandler(422)
+@app.errorhandler(400)
+def handle_error(err):
+    headers = err.data.get("headers", None)
+    messages = err.data.get("messages", ["Invalid request."])
+    if headers:
+        return jsonify({"errors": messages}), err.code, headers
+    else:
+        return jsonify({"errors": messages}), err.code
 
 
 @app.route('/')
